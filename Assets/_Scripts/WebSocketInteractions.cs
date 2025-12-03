@@ -1029,6 +1029,64 @@ public class WebSocketInteractions : MonoBehaviour
 	}
 	#endregion
 
+	public void Hanabi(Vector2 startPosition, float explosionHeight, int count, Sprite sprite = null, List<UniGif.GifTexture> gif = null)
+	{
+		List<Emote> emotes = CreateHanabi(count, sprite, gif);
+
+		foreach (var emote in emotes)
+		{
+			RectTransform rt = (RectTransform)emote.transform;
+			rt.anchoredPosition = startPosition;
+			rt.DOAnchorPosY(explosionHeight, 1f).OnComplete(() => emote.Move());
+		}
+	}
+
+	public List<Emote> CreateHanabi(int count, Sprite sprite = null, List<UniGif.GifTexture> gif = null)
+	{
+		List<Emote> emotes = new List<Emote>();
+
+		for (int i = 0; i < count; i++)
+		{
+			if(sprite != null)
+			{
+				emotes.Add(HanabiSprite(sprite));
+			}
+			else if(gif != null)
+			{
+				emotes.Add(HanabiGif(gif));
+			}
+			else
+			{
+				SplashSO splash = GetWeightedImage();
+				if (splash.isGif)
+				{
+					emotes.Add(HanabiGif(gifTextures[splash]));
+				}
+				else
+				{
+					emotes.Add(HanabiSprite(splash.sprite));
+
+				}
+			}
+		}
+
+		return emotes;
+	}
+
+	public Emote HanabiSprite(Sprite sprite)
+	{
+		Emote emote = Instantiate(emotePrefab, canvas);
+		emote.SetSprite(sprite);
+		return emote;
+	}
+
+	public Emote HanabiGif(List<UniGif.GifTexture> textures)
+	{
+		Emote emote = Instantiate(emoteGifPrefab, canvas);
+		emote.SetGif(textures, avatarSo.width, avatarSo.height);
+		return emote;
+	}
+
 	public void SpawnHellos(int count)
 	{
 		Vector2 spawnPosition = GetRandomPointOnScreeen();

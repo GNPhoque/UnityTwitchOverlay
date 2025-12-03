@@ -80,7 +80,16 @@ namespace Desktopia
             Windows.Main.SetTransparent(transparent);
             Windows.Main.SetTopMost(topMost);
             Windows.Main.SetClickThrough(clickThrough);
+
+            InvokeRepeating("RefreshWindowState", 120, 120);
         }
+
+        private void RefreshWindowState()
+        {
+			Windows.Main.SetTransparent(transparent);
+			Windows.Main.SetTopMost(topMost);
+			Windows.Main.SetClickThrough(clickThrough);
+		}
 
         void Update()
         {

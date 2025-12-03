@@ -316,6 +316,12 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 					WebSocketInteractions.instance.Shutdown();
 				}
 				#endregion
+
+				else if(command == "hanabi")
+				{
+					WebSocketInteractions.instance.Hanabi(new Vector2(-600, -700), 1f, 8);
+					WebSocketInteractions.instance.Hanabi(new Vector2(600, -700), 1f, 8);
+				}
 			}
 			catch (Exception ex)
 			{

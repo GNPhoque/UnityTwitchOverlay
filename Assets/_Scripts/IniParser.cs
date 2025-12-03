@@ -39,6 +39,8 @@ public static class IniParser
 	public static string paintFillScreenProgressive;
 	public static string paintEmptyScreenProgressive;
 	public static string phoqueThroughScreen;
+	public static string lurk;
+	public static string dodo;
 
 	public static string showDeathCounter;
 	public static string hideDeathCounter;
@@ -178,6 +180,12 @@ public static class IniParser
 						break;
 					case "phoqueThroughScreen":
 						phoqueThroughScreen = parts[1];
+						break;
+					case "lurk":
+						lurk = parts[1];
+						break;
+					case "dodo":
+						dodo = parts[1];
 						break;
 
 					case "showDeathCounter":

@@ -332,6 +332,7 @@ public class LoyaltyCard : MonoBehaviour
 
 	private void SpawnStamp(Vector2 pos, float rot)
 	{
+		AudioManager.instance.PlayStamp();
 		RectTransform spawned = Instantiate(stampPrefab, stampsContainer);
 		spawned.anchoredPosition = pos;
 		spawned.rotation = Quaternion.Euler(0f, 0f, rot);

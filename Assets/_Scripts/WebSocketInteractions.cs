@@ -78,9 +78,16 @@ public class WebSocketInteractions : MonoBehaviour
 	private SplashSO so;
 
 	[SerializeField]
-	private Emote helloEmotePrefab;
+	private Emote emotePrefab;
+	[SerializeField]
+	private Emote emoteGifPrefab;
 	[SerializeField]
 	private RectTransform throughScreenImage;
+	[SerializeField]
+	private string lurkGifPath;
+	private List<UniGif.GifTexture> lurkGif;
+	[SerializeField]
+	private Sprite dodoSprite;
 
 	public static WebSocketInteractions instance;
 
@@ -109,6 +116,7 @@ public class WebSocketInteractions : MonoBehaviour
 						
 			StartCoroutine(GifPlayer.SetGifFromUrlCoroutine(splash.gifPath, (textures) => gifTextures.Add(splash, textures)));
 		}
+		StartCoroutine(GifPlayer.SetGifFromUrlCoroutine(lurkGifPath, (textures) => lurkGif = textures));
 
 		happyHourCoroutine = StartCoroutine(StartHappyHourRandom());
 	}
@@ -337,6 +345,28 @@ public class WebSocketInteractions : MonoBehaviour
 	{
 		throughScreenImage.anchoredPosition = new Vector2(-2000, throughScreenImage.anchoredPosition.y);
 		throughScreenImage.DOAnchorPosX(2000, 5f).SetEase(Ease.Linear);
+	}
+
+	public void Lurk(string user)
+	{
+		Vector2 spawnPosition = GetRandomPointOnScreeen();
+		print(spawnPosition);
+		Emote lurk = Instantiate(emoteGifPrefab, canvas);
+		((RectTransform)lurk.transform).anchoredPosition = spawnPosition;
+		lurk.SetText(user);
+		lurk.SetGif(lurkGif, avatarSo.width, avatarSo.height);
+		lurk.Move();
+	}
+
+	public void Dodo(string user)
+	{
+		Vector2 spawnPosition = GetRandomPointOnScreeen();
+		print(spawnPosition);
+		Emote dodo = Instantiate(emotePrefab, canvas);
+		((RectTransform)dodo.transform).anchoredPosition = spawnPosition;
+		dodo.SetText(user);
+		dodo.SetSprite(dodoSprite);
+		dodo.Move();
 	}
 	#endregion
 
@@ -999,12 +1029,12 @@ public class WebSocketInteractions : MonoBehaviour
 	}
 	#endregion
 
-	public void SpawnHellos()
+	public void SpawnHellos(int count)
 	{
 		Vector2 spawnPosition = GetRandomPointOnScreeen();
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < count; i++)
 		{
-			Emote hello = Instantiate(helloEmotePrefab, canvas);
+			Emote hello = Instantiate(emotePrefab, canvas);
 			((RectTransform)hello.transform).anchoredPosition = spawnPosition;
 			hello.Move();
 		}

@@ -80,6 +80,18 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				{
 					WebSocketInteractions.instance.PhoqueThroughScreen();
 				}
+				else if (command == IniParser.lurk)
+				{
+					string user = json.user;
+
+					WebSocketInteractions.instance.Lurk(user);
+				}
+				else if (command == IniParser.dodo)
+				{
+					string user = json.user;
+
+					WebSocketInteractions.instance.Dodo(user);
+				}
 				#endregion
 
 				#region DEATH COUNTER
@@ -159,8 +171,9 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				{
 					string user = json.user;
 					string avatar = json.avatar;
+					int count = (int)json.viewer_count;
 
-					WebSocketInteractions.instance.SpawnHellos();
+					WebSocketInteractions.instance.SpawnHellos(count);
 					WebSocketInteractions.instance.StampCard(user, avatar, ELoyaltyCardType.Daily);
 				}
 				else if (command == IniParser.stampCardSub)

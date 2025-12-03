@@ -73,6 +73,8 @@ public class WebSocketInteractions : MonoBehaviour
 	private bool isFollowingHand;
 	private HandTrackingPython python;
 
+	[SerializeField]
+	private SplashSO avatarSo;
 	private SplashSO so;
 
 	[SerializeField]
@@ -196,7 +198,7 @@ public class WebSocketInteractions : MonoBehaviour
 				// Get downloaded profile picture sprite
 				var texture = DownloadHandlerTexture.GetContent(uwr);
 				Sprite s = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
-				so = splashes.First();
+				so = avatarSo;
 				so.sprite = s;
 				Logger.Log("User avatar retrieved");
 			}

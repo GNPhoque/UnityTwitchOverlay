@@ -175,6 +175,11 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				{
 					string user = json.user;
 
+					if(user == "WizeBot")
+					{
+						return;
+					}
+
 					WebSocketInteractions.instance.SendFidDetails(user);
 				}
 				#endregion

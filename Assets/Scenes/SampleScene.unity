@@ -7457,6 +7457,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d6be5ddda50d8fc41aef5588987b6265, type: 2}
   loyaltyCard: {fileID: 1316983144}
   hand: {fileID: 674251014}
+  avatarSo: {fileID: 11400000, guid: ceb2e069f8979d44da37d51a3300d6d1, type: 2}
   helloEmotePrefab: {fileID: 3241858856150696754, guid: faec9ae9e219372408e18a4a2e4f3aaa, type: 3}
   throughScreenImage: {fileID: 1821734899}
 --- !u!114 &1813046144

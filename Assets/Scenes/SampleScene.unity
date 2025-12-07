@@ -7315,6 +7315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 154912324}
+  canvasScaler: {fileID: 428853299}
   splatterPrefab: {fileID: 4222802726442678471, guid: a34ef30f84acdce4396fec8e6c2c7ff8, type: 3}
   gifPlayerPrefab: {fileID: 5421761116303704734, guid: b4a7c84230039a9408bddd2e5dcab791, type: 3}
   deathCounterText: {fileID: 1556703668}

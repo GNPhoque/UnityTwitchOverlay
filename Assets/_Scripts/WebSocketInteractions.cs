@@ -26,6 +26,8 @@ public class WebSocketInteractions : MonoBehaviour
 	[SerializeField]
 	private Transform canvas;
 	[SerializeField]
+	private CanvasScaler canvasScaler;
+	[SerializeField]
 	private Image splatterPrefab;
 	[SerializeField]
 	private GifPlayer gifPlayerPrefab;
@@ -125,7 +127,7 @@ public class WebSocketInteractions : MonoBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
-			Vector3 pos = new Vector3(Random.Range(0, Screen.width), Random.Range(0, Screen.height), 0f);
+			Vector3 pos = new Vector3(Random.Range(0, canvasScaler.referenceResolution.x), Random.Range(0, canvasScaler.referenceResolution.y), 0f);
 			Instantiate(splatterPrefab, pos, Quaternion.identity, canvas);
 		}
 	}
@@ -148,11 +150,11 @@ public class WebSocketInteractions : MonoBehaviour
 		Vector2 pos;
 		if (left == -1 && top == -1)
 		{
-			pos = new Vector2(Random.Range(0, Screen.width), Random.Range(0, Screen.height));
+			pos = new Vector2(Random.Range(0, canvasScaler.referenceResolution.x), Random.Range(0, canvasScaler.referenceResolution.y));
 		}
 		else
 		{
-			pos = new Vector2(Screen.width * left / 100f, Screen.height * top / 100f);
+			pos = new Vector2(canvasScaler.referenceResolution.x * left / 100f, canvasScaler.referenceResolution.y * top / 100f);
 		}
 
 		Quaternion rot = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
@@ -1001,7 +1003,7 @@ public class WebSocketInteractions : MonoBehaviour
 		//	return;
 		//}
 
-		hand.transform.position = new Vector3(Screen.width * left, Screen.height * -top + Screen.height);
+		hand.transform.position = new Vector3(canvasScaler.referenceResolution.x * left, Screen.height * -top + canvasScaler.referenceResolution.y);
 		//Canvas.SetLeft(hand, (int)SystemParameters.PrimaryScreenWidth * left);
 		//Canvas.SetTop(hand, (int)SystemParameters.PrimaryScreenHeight * top);
 	}

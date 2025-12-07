@@ -5185,7 +5185,7 @@ MonoBehaviour:
   cardImage: {fileID: 1316983145}
   defaultUserPP: {fileID: 21300000, guid: 3cbc7322f6b6e4343a23066cf317ab86, type: 3}
   cardDailySprite: {fileID: 21300000, guid: 686d2bccbec5603478aec606550be9a3, type: 3}
-  cardSubSprite: {fileID: 21300000, guid: fe89bc160f03bd44f9c1fcfc6c913e7c, type: 3}
+  cardSubSprite: {fileID: 21300000, guid: 0b106bff25e7b9041ba33336d9f122b6, type: 3}
   cardOutScreenPosition: {x: 0, y: 949}
   cardInScreenPosition: {x: 0, y: 459}
   stampsContainer: {fileID: 1247419557}

@@ -26,9 +26,13 @@ public class OverlayWindow : MonoBehaviour
 	LocalWebSocket local = new LocalWebSocket();
 
 	#region MONOBEHAVIOUR
-	void Start()
+	private void Awake()
 	{
 		FetchSettings();
+	}
+
+	void Start()
+	{
 		twitch.SetupTwitchWebSocket();
 		local.SetupLocalWebSocket();
 		WindowFocusManager.GetUnityWindowHandle();

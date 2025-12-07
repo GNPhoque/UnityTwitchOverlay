@@ -103,34 +103,36 @@ public class LoyaltyCard : MonoBehaviour
 	private LoyaltyCardData dataSubs;
 	private LoyaltyCardUser currentUser;
 
-	public void ResetRedeemedUsers()
+	private void Start()
 	{
 		string file = IniParser.loyaltyCardDailyFile;
 		if (!File.Exists(file))
 		{
 			Logger.LogError($"ERROR | Cannot read loyalty card file : {file} to reset redeemed users");
-			return ;
+			return;
 		}
-
-		data = JsonConvert.DeserializeObject<LoyaltyCardData>(File.ReadAllText(file));
-		data.redeemedUsers.Clear();
-		SaveData(ELoyaltyCardType.Daily);
+		dataDaily = JsonConvert.DeserializeObject<LoyaltyCardData>(File.ReadAllText(file));
 
 		file = IniParser.loyaltyCardSubFile;
 		if (!File.Exists(file))
 		{
 			Logger.LogError($"ERROR | Cannot read loyalty card file : {file} to reset redeemed users");
-			return ;
+			return;
 		}
+		dataSubs = JsonConvert.DeserializeObject<LoyaltyCardData>(File.ReadAllText(file));
+	}
 
-		data = JsonConvert.DeserializeObject<LoyaltyCardData>(File.ReadAllText(file));
-		data.redeemedUsers.Clear();
+	public void ResetRedeemedUsers()
+	{
+		dataDaily.redeemedUsers.Clear();
+		SaveData(ELoyaltyCardType.Daily);
+
+		dataSubs.redeemedUsers.Clear();
 		SaveData(ELoyaltyCardType.Sub);
 	}
 
-	public void StampCard(string username, string avatar, ELoyaltyCardType cardType, int count = 1)
+	public void AddToQueue(string username, string avatar, ELoyaltyCardType cardType, int count = 1)
 	{
-		//TODO : Add Queue to prevent data overwriting
 		if (isProcessing || queue.Count > 0)
 		{
 			queue.Add(new QueuedUser(username, avatar, cardType, count));
@@ -138,41 +140,45 @@ public class LoyaltyCard : MonoBehaviour
 		}
 
 		queue.Add(new QueuedUser(username, avatar, cardType, count));
-		StartCoroutine(GetUserAvatar());
+		StartCoroutine(StampCard());
 	}
 
-	//TODO : Check depending on card type
-	private bool HasUserAlreadyStampedCard(string username, ELoyaltyCardType cardType)
+	private bool HasUserAlreadyStampedCard(QueuedUser user)
 	{
-		if (cardType != ELoyaltyCardType.Daily)
+		if (user.cardType!= ELoyaltyCardType.Daily)
 		{
 			//only daily is once per day
 			return false;
 		}
 
-		data = cardType == ELoyaltyCardType.Daily ? dataDaily : dataSubs;			
-		string file = cardType == ELoyaltyCardType.Daily ? IniParser.loyaltyCardDailyFile : IniParser.loyaltyCardSubFile;
+		data = user.cardType == ELoyaltyCardType.Daily ? dataDaily : dataSubs;			
+		string file = user.cardType == ELoyaltyCardType.Daily ? IniParser.loyaltyCardDailyFile : IniParser.loyaltyCardSubFile;
 
 		if(data == null)
 		{
 			if (!File.Exists(file))
 			{
-				Logger.LogError($"ERROR | Cannot read loyalty card file : {file} to update card for {username}");
+				Logger.LogError($"ERROR | Cannot read loyalty card file : {file} to update card for {user.username}");
 				return true;
 			}
 
 			data = JsonConvert.DeserializeObject<LoyaltyCardData>(File.ReadAllText(file));
 		}
 
-		currentUser = data.users.FirstOrDefault(x=>x.username == username);
+		currentUser = data.users.FirstOrDefault(x=>x.username == user.username);
 		if (currentUser == null)
 		{
-			currentUser = new LoyaltyCardUser(){username = username};
+			currentUser = new LoyaltyCardUser(){username = user.username };
 			data.users.Add(currentUser);
 			return false;
 		}
+		else if(user.url == "{AVATAR}")
+		{
+			user.url = currentUser.avatarUrl;
+		}
 
-		if (data.redeemedUsers.Contains(username))
+
+		if (data.redeemedUsers.Contains(user.username))
 		{
 			return true;
 		}
@@ -180,7 +186,7 @@ public class LoyaltyCard : MonoBehaviour
 		return false;
 	}
 
-	private IEnumerator GetUserAvatar()
+	private IEnumerator StampCard()
 	{
 		QueuedUser user;
 		while (queue.Count > 0)
@@ -195,42 +201,40 @@ public class LoyaltyCard : MonoBehaviour
 			queue.RemoveAt(0);
 
 			//Check if user has already redeemed today
-			if (HasUserAlreadyStampedCard(user.username, user.cardType))
+			if (HasUserAlreadyStampedCard(user))
 			{
 				Logger.LogError($"{user.username} is trying to stamp his {user.cardType} card again");
 				continue;
 			}
 
-			using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(user.url))
+			Task<Sprite> t=GetUserAvatar(user.username, user.url, user.cardType);
+
+			while (!t.IsCompleted)
 			{
-				yield return uwr.SendWebRequest();
+				yield return null;
+			}
+			if (t.IsFaulted)
+			{
+				Logger.LogError(t.Exception.ToString());
+				continue;
+			}
+			else
+			{
+				ppImage.sprite = t.Result;
+			}
 
-				if (uwr.result != UnityWebRequest.Result.Success)
-				{
-					Logger.LogError($"Error fetching avatar for {user.username}");
-					Logger.LogError($"avatar url :{user.url}");
-					Logger.LogError(uwr.error);
-					ppImage.sprite = defaultUserPP;
-				}
-				else
-				{
-					// Get downloaded profile picture sprite
-					var texture = DownloadHandlerTexture.GetContent(uwr);
-					Sprite s = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
-					ppImage.sprite = s;
-				}
+			usernameText.text = $"Valid for : {user.username}";
+			cardImage.sprite = user.cardType == ELoyaltyCardType.Daily ? cardDailySprite : cardSubSprite;
 
-				usernameText.text = $"Valid for : {user.username}";
+			RestoreStamps(user.username);
 
-				cardImage.sprite = user.cardType == ELoyaltyCardType.Daily ? cardDailySprite : cardSubSprite;
+			Stamp(user.username, user.cardType, user.count);
 
-				RestoreStamps(user.username);
-
-				Stamp(user.username, user.cardType, user.count);
-
-				currentUser.avatarUrl = user.url;
+			if (user.username != "testFidDaily")
+			{
 				data.redeemedUsers.Add(user.username);
 			}
+
 			yield return new WaitUntil(() => isProcessing == false);
 
 			SaveData(user.cardType);
@@ -375,5 +379,67 @@ public class LoyaltyCard : MonoBehaviour
 		}
 
 		return ret;
+	}
+
+	public async Task<Sprite> GetUserAvatar(string pseudo, string url, ELoyaltyCardType cardType)
+	{
+
+		LoyaltyCardUser u = (cardType == ELoyaltyCardType.Sub ? dataSubs : dataDaily).users.FirstOrDefault(x => x.username == pseudo);
+		if(url == "{AVATAR}")
+		{
+			if(u != null)
+			{
+				url = u.avatarUrl;
+			}
+			else
+			{
+				Logger.LogError($"Error fetching avatar for {pseudo}, received avatar url : {url}");
+				return defaultUserPP;
+			}
+		}
+
+		using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url))
+		{
+			try
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					await uwr.SendWebRequest();
+
+					if (uwr.result != UnityWebRequest.Result.Success)
+					{
+						Logger.LogError($"Error fetching avatar for {pseudo}");
+						Logger.LogError($"avatar url :{url}");
+						Logger.LogError(uwr.error);
+					}
+					else
+					{
+						if (u != null)
+						{
+							u.avatarUrl = url;
+						}
+						else
+						{
+							u = new LoyaltyCardUser()
+							{
+								username = pseudo,
+								avatarUrl = url
+							};
+
+							SaveData(cardType);
+						}
+
+						var texture = DownloadHandlerTexture.GetContent(uwr);
+						return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Logger.LogError(e.Message);
+			}
+
+			return defaultUserPP;
+		}
 	}
 }

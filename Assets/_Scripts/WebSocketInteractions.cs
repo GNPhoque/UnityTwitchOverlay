@@ -131,12 +131,13 @@ public class WebSocketInteractions : MonoBehaviour
 	}
 
 	#region SPLASH
-	public async Task DrawSplash(float left = -1, float top = -1, int duration = -1, string avatarUrl = "")
+	public async void DrawSplash(float left = -1, float top = -1, int duration = -1, string avatarUrl = "", string pseudo = "")
 	{
 		so = null;
 		if (!string.IsNullOrEmpty(avatarUrl))
 		{
-			await GetUserAvatar(avatarUrl);			
+			so = avatarSo;
+			so.sprite = await loyaltyCard.GetUserAvatar(pseudo, avatarUrl, ELoyaltyCardType.Daily);
 		}
 
 		if(so == null)
@@ -188,29 +189,6 @@ public class WebSocketInteractions : MonoBehaviour
 		StartCoroutine(SplashEaseIn(rt));
 		//StartCoroutine(RemoveSplashAfterDelay(3, splash.gameObject));
 		StartCoroutine(RemoveSplashAfterDelay(duration == -1 ? so.duration : duration, splash.gameObject));
-	}
-
-	private async Task GetUserAvatar(string avatarUrl)
-	{
-		using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(avatarUrl))
-		{
-			await uwr.SendWebRequest();
-
-			if (uwr.result != UnityWebRequest.Result.Success)
-			{
-				Logger.LogError($"Error fetching avatar from {avatarUrl}");
-				Logger.LogError(uwr.error);
-			}
-			else
-			{
-				// Get downloaded profile picture sprite
-				var texture = DownloadHandlerTexture.GetContent(uwr);
-				Sprite s = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
-				so = avatarSo;
-				so.sprite = s;
-				Logger.Log("User avatar retrieved");
-			}
-		}
 	}
 
 	private SplashSO GetWeightedImage()
@@ -541,7 +519,7 @@ public class WebSocketInteractions : MonoBehaviour
 
 	public void StampCard(string username, string avatar, ELoyaltyCardType cardType, int number = 1)
 	{
-		loyaltyCard.StampCard(username, avatar, cardType, number);
+		loyaltyCard.AddToQueue(username, avatar, cardType, number);
 	}
 
 	public void SendFidDetails(string username)

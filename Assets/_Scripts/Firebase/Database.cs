@@ -302,5 +302,30 @@ public class Database : MonoBehaviour
 			throw e;
 		}
 	}
+	
+	public async Task<int> GetUserTotalOuates(string username)
+	{
+		try
+		{
+			int total = 0;
+			await storage.Collection($"Users/{username.ToLower()}/Stats").GetSnapshotAsync().ContinueWithOnMainThread(x =>
+			{
+				foreach (var item in x.Result)
+				{
+					int ouates = 0;
+					item.TryGetValue("ouates", out ouates);
+					total += ouates;
+				}
+			});
+
+			return total;
+		}
+		catch (Exception e)
+		{
+			Logger.LogError($"Error getting user total ouates: Users/{username.ToLower()}/Stats/");
+			Logger.LogError(e.Message);
+			throw e;
+		}
+	}
 	#endregion
 }

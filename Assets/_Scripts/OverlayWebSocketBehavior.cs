@@ -61,7 +61,7 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 					string user = json.user;
 
 					WebSocketInteractions.instance.CreditsAddHappyHourPainter(user);
-					WebSocketInteractions.instance.DrawSplash((float)json.x, 100 - (float)json.y, 10);
+					WebSocketInteractions.instance.DrawSplash((float)json.x, 100 - (float)json.y, 10, "", "", (bool)json.ctrl, (bool)json.alt, (bool)json.shift);
 				}
 				else if (command == IniParser.paintRemoveOne)
 				{

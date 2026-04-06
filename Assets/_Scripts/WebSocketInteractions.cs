@@ -67,6 +67,12 @@ public class WebSocketInteractions : MonoBehaviour
 	[SerializeField]
 	private RectTransform bigRaclette;
 	[SerializeField]
+	private SplashSO ctrlSplash;
+	[SerializeField]
+	private SplashSO altSplash;
+	[SerializeField]
+	private SplashSO shiftSplash;
+	[SerializeField]
 	private List<SplashSO> splashes = new List<SplashSO>();
 	private Dictionary<SplashSO, List<UniGif.GifTexture>> gifTextures = new Dictionary<SplashSO, List<UniGif.GifTexture>>();
 
@@ -104,6 +110,22 @@ public class WebSocketInteractions : MonoBehaviour
 	[SerializeField]
 	private List<TimerImage> timerImages;
 	private List<Emote> timersReadyToDelete = new List<Emote>();
+
+	[Header("SteamAchievement")]
+	[SerializeField]
+	private float steamAchievementMoveSpeed;
+	[SerializeField]
+	private float steamAchievementUpPosition;
+	[SerializeField]
+	private float steamAchievementDownPosition;
+	[SerializeField]
+	private RectTransform steamAchievement;
+	[SerializeField]
+	private Image steamAchievementImage;
+	[SerializeField]
+	private TextMeshProUGUI steamAchievementTitle;
+	[SerializeField]
+	private TextMeshProUGUI steamAchievementDescription;
 
 	private bool isPhoqueThroughScreenGoing;
 
@@ -149,7 +171,7 @@ public class WebSocketInteractions : MonoBehaviour
 	}
 
 	#region SPLASH
-	public async void DrawSplash(float left = -1, float top = -1, int duration = -1, string avatarUrl = "", string pseudo = "")
+	public async void DrawSplash(float left = -1, float top = -1, int duration = -1, string avatarUrl = "", string pseudo = "", bool ctrl = false, bool alt = false, bool shift = false)
 	{
 		so = null;
 		if (!string.IsNullOrEmpty(avatarUrl))
@@ -158,7 +180,20 @@ public class WebSocketInteractions : MonoBehaviour
 			so.sprite = await Database.instance.GetUserAvatarFromTwitchat(pseudo, avatarUrl);
 		}
 
-		if(so == null)
+		if (ctrl)
+		{
+			so = ctrlSplash;
+		}
+		else if (alt)
+		{
+			so = altSplash;
+		}
+		else if (shift)
+		{
+			so = shiftSplash;
+		}
+
+		if (so == null)
 		{
 			so = GetWeightedImage();
 		}
@@ -987,6 +1022,7 @@ public class WebSocketInteractions : MonoBehaviour
 			return;
 		}
 
+		StartCoroutine(GetUserTotalOuates(user, value));
 		CreditsData data = JsonConvert.DeserializeObject<CreditsData>(File.ReadAllText(IniParser.creditsFile)) ?? new CreditsData();
 		if (data.ouates.ContainsKey(user))
 		{
@@ -1001,6 +1037,58 @@ public class WebSocketInteractions : MonoBehaviour
 		File.WriteAllText(IniParser.creditsFile, json);
 		UpdateCredits();
 	}
+
+
+	private IEnumerator GetUserTotalOuates(string user, int newOuates)
+	{
+		//TODO : get current ouates total
+		int result = 0;
+		Task<int> task = Database.instance.GetUserTotalOuates(user);
+
+		while (!task.IsCompleted)
+		{
+			yield return null;
+		}
+		if (task.IsFaulted)
+		{
+			Logger.LogError(task.Exception.ToString());
+			yield break;
+		}
+		else
+		{
+			result = task.Result;
+		}
+
+		if(result < 100000 && result + newOuates > 100000)
+		{
+			Logger.Log($"{user} reached 100K Ouates!");
+
+			Sprite sprite = null;
+			Task<Sprite> ts = Database.instance.GetUserAvatarFromDB(user);
+
+			while (!ts.IsCompleted)
+			{
+				yield return null;
+			}
+			if (ts.IsFaulted)
+			{
+				Logger.LogError(ts.Exception.ToString());
+				yield break;
+			}
+			else
+			{
+				sprite = ts.Result;
+			}
+
+			StartCoroutine(ShowSteamAchievement(sprite, "100K!", "100K ouates dépensées", 5f));
+			yield break;
+		}
+		else
+		{
+			Logger.Log($"{user} total ouates : {result + newOuates}");
+		}
+	}
+
 	public void CreditsAddHappyHourPainter(string painter)
 	{
 		if (!File.Exists(IniParser.creditsFile))
@@ -1426,5 +1514,26 @@ public class WebSocketInteractions : MonoBehaviour
 			Logger.LogError(e.Message);
 		}
 		return false;
+	}
+
+	private IEnumerator ShowSteamAchievement(Sprite sprite, string title, string description, float duration)
+	{
+		steamAchievementImage.sprite = sprite;
+		steamAchievementTitle.text = title;
+		steamAchievementDescription.text = description;
+
+		while(steamAchievement.anchoredPosition.y< steamAchievementUpPosition)
+		{
+			steamAchievement.anchoredPosition += Vector2.up * steamAchievementMoveSpeed * Time.deltaTime;
+			yield return null;
+		}
+
+		yield return new WaitForSeconds(duration);
+
+		while (steamAchievement.anchoredPosition.y > steamAchievementDownPosition)
+		{
+			steamAchievement.anchoredPosition -= Vector2.up * steamAchievementMoveSpeed * Time.deltaTime;
+			yield return null;
+		}
 	}
 }

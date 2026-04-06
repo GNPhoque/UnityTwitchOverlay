@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Splash : MonoBehaviour
 {
-    public bool markedForDestruction;
+    public bool markedForDestruction = false;
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
@@ -11,7 +11,6 @@ public class Splash : MonoBehaviour
 			return;
 		}
 
-		markedForDestruction = true;
 		StartCoroutine(WebSocketInteractions.instance.RemoveSplashWithRaclette(this));
 	}
 }

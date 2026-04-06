@@ -1659,6 +1659,7 @@ RectTransform:
   - {fileID: 1821734899}
   - {fileID: 1316983143}
   - {fileID: 938578703}
+  - {fileID: 538768131}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2164,6 +2165,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 482734813}
   m_CullTransparentMesh: 1
+--- !u!1 &538768130
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 538768131}
+  - component: {fileID: 538768132}
+  m_Layer: 5
+  m_Name: Timers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &538768131
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 538768130}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 428853301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 1440}
+  m_Pivot: {x: 1, y: 0}
+--- !u!114 &538768132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 538768130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 20
+    m_Top: 0
+    m_Bottom: 90
+  m_ChildAlignment: 8
+  m_Spacing: 40
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1001 &561708252
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7268,6 +7331,7 @@ GameObject:
   - component: {fileID: 1813046145}
   - component: {fileID: 1813046144}
   - component: {fileID: 1813046146}
+  - component: {fileID: 1813046147}
   m_Layer: 0
   m_Name: MANAGER
   m_TagString: Untagged
@@ -7352,6 +7416,20 @@ MonoBehaviour:
   throughScreenImage: {fileID: 1821734899}
   lurkGifPath: Splashes/Lurking.gif
   dodoSprite: {fileID: 21300000, guid: 7f9e07c1eb9a0bc44ae460c66fa20a19, type: 3}
+  timerLayout: {fileID: 538768131}
+  timerImages:
+  - isTimerOver: 0
+    index: manette
+    sprite: {fileID: 21300000, guid: 9a7df4735f2aadc4082b01d07a0816d1, type: 3}
+  - isTimerOver: 0
+    index: lunettes
+    sprite: {fileID: 21300000, guid: f39e8664926d11d4fb3b249eb1ad2281, type: 3}
+  - isTimerOver: 0
+    index: clown
+    sprite: {fileID: 21300000, guid: a777eddeefbd98b489eb99d14a04bdb7, type: 3}
+  - isTimerOver: 0
+    index: debout
+    sprite: {fileID: 21300000, guid: 5f2858afe6e3196489d9f8f582ef6f08, type: 3}
 --- !u!114 &1813046144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7390,6 +7468,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcda80fb180bb754fbf11b0a5b72799b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1813046147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1813046140}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24c4fbd95b7687d44ae4be99e185f72e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultUserPP: {fileID: 21300000, guid: 3cbc7322f6b6e4343a23066cf317ab86, type: 3}
 --- !u!1 &1821734898
 GameObject:
   m_ObjectHideFlags: 0

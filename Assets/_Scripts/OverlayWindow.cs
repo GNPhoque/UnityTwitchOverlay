@@ -28,6 +28,9 @@ public class OverlayWindow : MonoBehaviour
 	#region MONOBEHAVIOUR
 	private void Awake()
 	{
+		QualitySettings.vSyncCount = 0;
+		Application.targetFrameRate = 165;
+
 		FetchSettings();
 	}
 

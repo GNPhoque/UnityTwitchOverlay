@@ -14,6 +14,14 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
+[Serializable]
+public class TimerImage
+{
+	public bool isTimerOver;
+	public string index;
+	public Sprite sprite;
+}
+
 public class WebSocketInteractions : MonoBehaviour
 {
 	[DllImport("user32.dll", SetLastError = true)]	static extern int GetWindowLong(IntPtr hWnd, int nIndex);
@@ -91,6 +99,14 @@ public class WebSocketInteractions : MonoBehaviour
 	[SerializeField]
 	private Sprite dodoSprite;
 
+	[SerializeField]
+	private Transform timerLayout;
+	[SerializeField]
+	private List<TimerImage> timerImages;
+	private List<Emote> timersReadyToDelete = new List<Emote>();
+
+	private bool isPhoqueThroughScreenGoing;
+
 	public static WebSocketInteractions instance;
 
 
@@ -139,7 +155,7 @@ public class WebSocketInteractions : MonoBehaviour
 		if (!string.IsNullOrEmpty(avatarUrl))
 		{
 			so = avatarSo;
-			so.sprite = await loyaltyCard.GetUserAvatar(pseudo, avatarUrl, ELoyaltyCardType.Daily);
+			so.sprite = await Database.instance.GetUserAvatarFromTwitchat(pseudo, avatarUrl);
 		}
 
 		if(so == null)
@@ -323,14 +339,19 @@ public class WebSocketInteractions : MonoBehaviour
 
 	public void PhoqueThroughScreen()
 	{
+		if (isPhoqueThroughScreenGoing)
+		{
+			return;
+		}
+
+		isPhoqueThroughScreenGoing = true;
 		throughScreenImage.anchoredPosition = new Vector2(-2000, throughScreenImage.anchoredPosition.y);
-		throughScreenImage.DOAnchorPosX(2000, 5f).SetEase(Ease.Linear);
+		throughScreenImage.DOAnchorPosX(2000, 5f).SetEase(Ease.Linear).OnComplete(() => isPhoqueThroughScreenGoing = false);
 	}
 
 	public void Lurk(string user)
 	{
 		Vector2 spawnPosition = GetRandomPointOnScreeen();
-		print(spawnPosition);
 		Emote lurk = Instantiate(emoteGifPrefab, canvas);
 		((RectTransform)lurk.transform).anchoredPosition = spawnPosition;
 		lurk.SetText(user);
@@ -523,10 +544,25 @@ public class WebSocketInteractions : MonoBehaviour
 	{
 		loyaltyCard.AddToQueue(username, avatar, cardType, number);
 	}
-
-	public void SendFidDetails(string username)
+	
+	public void AddDailyCardCompleted(string username)
 	{
-		string message = loyaltyCard.GetLoyaltyCardsStatusString(username);
+		Emote emote = Instantiate(emotePrefab, timerLayout);
+		emote.SetKinematic();
+		emote.SetText(username);
+		timersReadyToDelete.Add(emote);
+	}
+
+	public IEnumerator SendFidDetails(string username)
+	{
+		string message = "";
+		yield return StartCoroutine(loyaltyCard.GetLoyaltyCardsStatusString(username, (ret) => message = ret));
+
+		if (string.IsNullOrEmpty(message))
+		{
+			yield break;
+		}
+
 		string json = $"{{\"topic\":\"fidOut\", \"text\":\"{message}\"}}";
 		LocalWebSocket.wssv.WebSocketServices[$"/{IniParser.behaviorName}"].Sessions.Broadcast(json);
 		Logger.Log($"Message broadcasted : {json}");
@@ -943,6 +979,28 @@ public class WebSocketInteractions : MonoBehaviour
 		File.WriteAllText(IniParser.creditsFile, "");
 		UpdateCredits();
 	}
+	public void CreditsAddOuates(string user, int value)
+	{
+		if (!File.Exists(IniParser.creditsFile))
+		{
+			Logger.LogError($"ERROR | Cannot read credits file : {IniParser.creditsFile}");
+			return;
+		}
+
+		CreditsData data = JsonConvert.DeserializeObject<CreditsData>(File.ReadAllText(IniParser.creditsFile)) ?? new CreditsData();
+		if (data.ouates.ContainsKey(user))
+		{
+			data.ouates[user] = data.ouates[user] + value;
+		}
+		else
+		{
+			data.ouates.Add(user, value);
+		}
+
+		string json = JsonConvert.SerializeObject(data);
+		File.WriteAllText(IniParser.creditsFile, json);
+		UpdateCredits();
+	}
 	public void CreditsAddHappyHourPainter(string painter)
 	{
 		if (!File.Exists(IniParser.creditsFile))
@@ -1006,6 +1064,69 @@ public class WebSocketInteractions : MonoBehaviour
 		hand.transform.position = new Vector3(canvasScaler.referenceResolution.x * left, Screen.height * -top + canvasScaler.referenceResolution.y);
 		//Canvas.SetLeft(hand, (int)SystemParameters.PrimaryScreenWidth * left);
 		//Canvas.SetTop(hand, (int)SystemParameters.PrimaryScreenHeight * top);
+	}
+	#endregion
+
+	#region TIMER
+	public void AddTimer(string timerName, int duration)
+	{
+		TimerImage ti = timerImages.FirstOrDefault(x => x.index == timerName);
+
+		if (ti == null)
+		{
+			Logger.LogError($"Could not find timer name {timerName}");
+			return;
+		}
+
+		Emote emote = Instantiate(emotePrefab, timerLayout);
+		emote.SetKinematic();
+		emote.SetSprite(ti.sprite);
+
+		StartCoroutine(TimerCountdown(emote, duration, ti));
+	}
+
+	private IEnumerator TimerCountdown(Emote emote,  int duration, TimerImage ti)
+	{
+		int minutes = Mathf.FloorToInt(duration / 60);
+		int seconds = Mathf.FloorToInt(duration % 60);
+		if (minutes > 0)
+		{
+			emote.SetText($"{minutes}:{seconds}");
+		}
+		else
+		{
+			emote.SetText($"{seconds}");
+		}
+
+		while (duration > 0)
+		{
+			yield return new WaitForSeconds(1f);
+			duration--;
+			minutes = Mathf.FloorToInt(duration / 60);
+			seconds = Mathf.FloorToInt(duration % 60);
+			if(minutes > 0)
+			{
+				emote.SetText($"{minutes}:{seconds}");
+			}
+			else
+			{
+				emote.SetText($"{seconds.ToString("00")}");
+			}
+		}
+
+		timersReadyToDelete.Add(emote);
+	}
+
+	public void RemoveDoneTimers()
+	{
+		List<Emote> toDelete = new List<Emote>();
+
+		foreach (var item in timersReadyToDelete)
+		{
+			Destroy(item.gameObject);
+		}
+
+		timersReadyToDelete.Clear();
 	}
 	#endregion
 
@@ -1086,5 +1207,224 @@ public class WebSocketInteractions : MonoBehaviour
 	public void Shutdown()
 	{
 		Application.Quit();
+	}
+
+	public async Task<bool> UpdateViewerStats(string date = "")
+	{
+		try
+		{
+			CreditsData creditsData = JsonConvert.DeserializeObject<CreditsData>(File.ReadAllText(IniParser.creditsFile)) ?? new CreditsData();
+			Dictionary<string, ViewerStats> stats = new Dictionary<string, ViewerStats>();
+
+			foreach (var item in creditsData.userMessages)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					vs = stats[item.Key.ToLower()];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.messages = item.Value;
+
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					stats[item.Key.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.Key.ToLower(), vs);
+				}
+			}
+
+			foreach (var item in creditsData.ouates)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					vs = stats[item.Key.ToLower()];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.ouates = item.Value;
+
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					stats[item.Key.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.Key.ToLower(), vs);
+				}
+
+			}
+
+			foreach (var item in creditsData.raids)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.User.ToLower()))
+				{
+					vs = stats[item.User.ToLower()];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.raid++;
+				vs.raidViewers += item.Viewers;
+
+				if (stats.ContainsKey(item.User.ToLower()))
+				{
+					stats[item.User.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.User.ToLower(), vs);
+				}
+			}
+			//TODO : RaidOut
+
+			List<string> dailies = await Database.instance.GetAllDailyRedeemUsers();
+			foreach (var item in dailies)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.ToLower()))
+				{
+					vs = stats[item];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.stampDaily = 1;
+
+				if (stats.ContainsKey(item.ToLower()))
+				{
+					stats[item.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.ToLower(), vs);
+				}
+			}
+
+			foreach (var item in creditsData.subgifts)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					vs = stats[item.Key.ToLower()];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.stampSub = item.Value;
+
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					stats[item.Key.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.Key.ToLower(), vs);
+				}
+			}
+
+			foreach (var item in creditsData.subs)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.User.ToLower()))
+				{
+					vs = stats[item.User.ToLower()];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.stampSub = item.Months;
+
+				if (stats.ContainsKey(item.User.ToLower()))
+				{
+					stats[item.User.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.User.ToLower(), vs);
+				}
+			}
+
+			foreach (var item in creditsData.happyHourPaints)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					vs = stats[item.Key.ToLower()];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.taches = item.Value;
+
+				if (stats.ContainsKey(item.Key.ToLower()))
+				{
+					stats[item.Key.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.Key.ToLower(), vs);
+				}
+			}
+
+			foreach (var item in creditsData.vips)
+			{
+				ViewerStats vs;
+				if (stats.ContainsKey(item.ToLower()))
+				{
+					vs = stats[item.ToLower()];
+				}
+				else
+				{
+					vs = new ViewerStats();
+				}
+
+				vs.vip = 1;
+
+				if (stats.ContainsKey(item.ToLower()))
+				{
+					stats[item.ToLower()] = vs;
+				}
+				else
+				{
+					stats.Add(item.ToLower(), vs);
+				}
+			}
+
+			//stats.Add("TEST", new ViewerStats() { messages = 10, ouates = 1500, stampDaily=1, taches=25 });
+
+			foreach (var item in stats)
+			{
+				Database.instance.UpdateViewerStats(item.Key, item.Value, date);
+			}
+
+			return true;
+		}
+		catch (Exception e)
+		{
+			Logger.LogError(e.Message);
+		}
+		return false;
 	}
 }

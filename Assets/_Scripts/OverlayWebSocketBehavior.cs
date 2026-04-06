@@ -1,6 +1,8 @@
+using Firebase.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using WebSocketSharp;
 using WebSocketSharp.Server;
@@ -36,8 +38,9 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				#region PAINT
 				else if (command == IniParser.paintOne)
 				{
+					string user = json.user;
 					string avatar = json.avatar;
-					WebSocketInteractions.instance.DrawSplash(avatarUrl: avatar);
+					WebSocketInteractions.instance.DrawSplash(avatarUrl: avatar, pseudo: user);
 				}
 				else if (command == IniParser.paintTen)
 				{
@@ -56,7 +59,7 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				else if (command == "paintAt")
 				{
 					string user = json.user;
-				
+
 					WebSocketInteractions.instance.CreditsAddHappyHourPainter(user);
 					WebSocketInteractions.instance.DrawSplash((float)json.x, 100 - (float)json.y, 10);
 				}
@@ -188,12 +191,12 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				{
 					string user = json.user;
 
-					if(user == "WizeBot")
+					if (user == "WizeBot")
 					{
 						return;
 					}
 
-					WebSocketInteractions.instance.SendFidDetails(user);
+					WebSocketInteractions.instance.StartCoroutine(WebSocketInteractions.instance.SendFidDetails(user));
 				}
 				#endregion
 
@@ -219,12 +222,14 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				{
 					string user = json.user;
 					int value = (int)json.value;
+					string avatar = json.avatar;
 
 					WebSocketInteractions.instance.CreditsAddRaid(user, value);
 					for (int i = 0; i < (int)json.value; i++)
 					{
 						WebSocketInteractions.instance.DrawSplash();
 					}
+					WebSocketInteractions.instance.StampCard(user, avatar, ELoyaltyCardType.Daily);
 				}
 
 				else if (command == IniParser.sub)
@@ -284,10 +289,42 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 					WebSocketInteractions.instance.CreditsRemoveMessage(user);
 				}
 
+				else if (command == IniParser.anyOuate)
+				{
+					string user = json.user;
+					int value = (int)json.value;
+
+					string date = "";
+					date = json.date;
+					if (string.IsNullOrEmpty(date))
+					{
+						date = DateTime.Now.ToString("yyyyMMdd");
+					}
+
+					WebSocketInteractions.instance.CreditsAddOuates(user, value);
+					WebSocketInteractions.instance.UpdateViewerStats(date).ContinueWithOnMainThread(ret =>
+					{
+						Logger.Log($"Updated with return : {ret.Result}");
+					});
+				}
+
 				else if (command == IniParser.resetCredits)
 				{
-					WebSocketInteractions.instance.CreditsClearTextFile();
-					WebSocketInteractions.instance.ResetStampRedeemedUsers();
+					string date = "";
+					date = json.date;
+					if (string.IsNullOrEmpty(date))
+					{
+						date = DateTime.Now.ToString("yyyyMMdd");
+					}
+
+					WebSocketInteractions.instance.UpdateViewerStats(date).ContinueWithOnMainThread(ret =>
+					{
+						if (ret.Result)
+						{
+							WebSocketInteractions.instance.CreditsClearTextFile();
+							WebSocketInteractions.instance.ResetStampRedeemedUsers();
+						}
+					});
 				}
 				#endregion
 
@@ -310,6 +347,20 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				}
 				#endregion
 
+				#region TIMER
+				else if (command == IniParser.timer)
+				{
+					string timerName = json.timerName;
+					int duration = (int)json.duration;
+
+					WebSocketInteractions.instance.AddTimer(timerName, duration);
+				}
+				else if (command == IniParser.removeTimer)
+				{
+					WebSocketInteractions.instance.RemoveDoneTimers();
+				}
+				#endregion
+
 				#region EXIT
 				else if (command == IniParser.exit)
 				{
@@ -317,7 +368,7 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				}
 				#endregion
 
-				else if(command == "hanabi")
+				else if (command == "hanabi")
 				{
 					WebSocketInteractions.instance.Hanabi(new Vector2(-600, -700), 1f, 8);
 					WebSocketInteractions.instance.Hanabi(new Vector2(600, -700), 1f, 8);

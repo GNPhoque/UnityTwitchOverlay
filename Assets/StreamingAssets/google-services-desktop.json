@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "720190976494",
+    "project_id": "unitytwitchoverlay",
+    "storage_bucket": "unitytwitchoverlay.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720190976494:android:948b79a8200780d4e0deff",
+        "android_client_info": {
+          "package_name": "com.cestphoque.unitytwitchoverlay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCktEf-yTBnkQXvEHjEfmayXFOLq3vdxp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

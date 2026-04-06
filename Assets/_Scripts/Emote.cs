@@ -68,4 +68,9 @@ public class Emote : MonoBehaviour
 
 		Destroy(gameObject);
 	}
+
+	public void SetKinematic()
+	{
+		rb.bodyType = RigidbodyType2D.Kinematic;
+	}
 }

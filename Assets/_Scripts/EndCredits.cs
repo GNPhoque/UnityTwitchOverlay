@@ -13,6 +13,7 @@ public class CreditsData
 	public List<string> vips = new List<string>();
 	public Dictionary<string, int> userMessages = new Dictionary<string, int>();
 	public Dictionary<string, int> happyHourPaints = new Dictionary<string, int>();
+	public Dictionary<string, int> ouates = new Dictionary<string, int>();
 }
 
 public class RaidData
@@ -25,4 +26,5 @@ public class SubData
 {
 	public string User { get; set; }
 	public string Tier { get; set; }
+	public int Months { get; set; }
 }

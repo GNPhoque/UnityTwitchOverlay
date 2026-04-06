@@ -45,7 +45,7 @@ public class TwitchApiWebSocket
 
 			if (json.metadata.message_type == "session_keepalive")
 			{
-				Logger.Log($"{DateTime.Now} Received Keep Alive");
+				//Logger.Log($"{DateTime.Now} Received Keep Alive");
 				return;
 			}
 			else if (json.metadata.message_type == "session_reconnect")

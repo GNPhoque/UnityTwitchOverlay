@@ -213,8 +213,8 @@ MonoBehaviour:
   gifPlayer: {fileID: 5421761116303704734}
   minForce: 80
   maxForce: 400
-  minDelay: 4
-  maxDelay: 5
+  minDelay: 7
+  maxDelay: 10
 --- !u!1 &7957350086988835987
 GameObject:
   m_ObjectHideFlags: 0

@@ -70,11 +70,15 @@ public static class IniParser
 	public static string chatMessage;
 	public static string[] chatMessageFilteredNames;
 	public static string banDef;
+	public static string anyOuate;
 	public static string resetCredits;
 
 	public static string followHand;
 	public static string unfollowHand;
 	public static string handPosition;
+
+	public static string timer;
+	public static string removeTimer;
 
 	public static string exit;
 
@@ -264,6 +268,9 @@ public static class IniParser
 					case "banDef":
 						banDef = parts[1];
 						break;
+					case "anyOuate":
+						anyOuate = parts[1];
+						break;
 					case "resetCredits":
 						resetCredits = parts[1];
 						break;
@@ -276,6 +283,13 @@ public static class IniParser
 						break;
 					case "handPosition":
 						handPosition = parts[1];
+						break;
+
+					case "timer":
+						timer = parts[1];
+						break;
+					case "removeTimer":
+						removeTimer = parts[1];
 						break;
 
 					case "exit":

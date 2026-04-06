@@ -181,10 +181,11 @@ MonoBehaviour:
   rb: {fileID: 4359192410855343542}
   text: {fileID: 7582844090658138655}
   image: {fileID: 4222802726442678471}
+  gifPlayer: {fileID: 0}
   minForce: 80
   maxForce: 400
-  minDelay: 4
-  maxDelay: 5
+  minDelay: 7
+  maxDelay: 10
 --- !u!1 &7817551931723017056
 GameObject:
   m_ObjectHideFlags: 0

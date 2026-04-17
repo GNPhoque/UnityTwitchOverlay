@@ -28,4 +28,9 @@ public class AudioManager : MonoBehaviour
 	{
 		sfx.PlayOneShot(stamp, stampVolume);
 	}
+
+	public void PlaySound(AudioClip clip)
+	{
+		sfx.PlayOneShot(clip);
+	}
 }

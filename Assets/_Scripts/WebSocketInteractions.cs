@@ -131,6 +131,16 @@ public class WebSocketInteractions : MonoBehaviour
 
 	private bool isPhoqueThroughScreenGoing;
 
+	#region USER COMMANDS
+	[Header("USER COMMANDS")]
+	[SerializeField]
+	private AudioClip makerLixAudio;
+	[SerializeField]
+	private AudioClip westredAudio;
+	#endregion
+	[SerializeField]
+	private List<TimerImage> completedTimerList;
+
 	public static WebSocketInteractions instance;
 
 
@@ -590,9 +600,13 @@ public class WebSocketInteractions : MonoBehaviour
 		loyaltyCard.AddToQueue(username, avatar, cardType, number);
 	}
 	
-	public void AddDailyCardCompleted(string username)
+	public void AddCompletedTimer(string username, Sprite sprite = null)
 	{
 		Emote emote = Instantiate(emotePrefab, timerLayout);
+		if(sprite != null)
+		{
+			emote.SetSprite(sprite);
+		}
 		emote.SetKinematic();
 		emote.SetText(username);
 		timersReadyToDelete.Add(emote);
@@ -1562,5 +1576,32 @@ public class WebSocketInteractions : MonoBehaviour
 		hour += totalSubs / 2;
 
 		streamEndTimer.text = $"Fin du live : {hour}:{minutes}";
+	}
+
+	public void AddCompletedTimerWS(string image)
+	{
+		TimerImage ti = completedTimerList.FirstOrDefault(x => x.index == image);
+		Emote emote = Instantiate(emotePrefab, timerLayout);
+		if (ti != null)
+		{
+			emote.SetSprite(ti.sprite);
+		}
+		emote.SetKinematic();
+		timersReadyToDelete.Add(emote);
+	}
+
+	public void UserCommand(string userName)
+	{
+		switch (userName)
+		{
+			case "MakerLix":
+				AudioManager.instance.PlaySound(makerLixAudio);
+				break;
+			case "westredfgc":
+				AudioManager.instance.PlaySound(westredAudio);
+				break;
+			default:
+				break;
+		}
 	}
 }

@@ -361,6 +361,19 @@ public class OverlayWebSocketBehavior : WebSocketBehavior
 				}
 				#endregion
 
+				#region USER COMMANDS
+				else if (command == IniParser.userCommand)
+				{
+					string userName = json.user;
+					WebSocketInteractions.instance.UserCommand(userName);
+				}
+				else if (command == IniParser.addCompletedTimer)
+				{
+					string image = json.image;
+					WebSocketInteractions.instance.AddCompletedTimerWS(image);
+				}
+				#endregion
+
 				#region EXIT
 				else if (command == IniParser.exit)
 				{

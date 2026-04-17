@@ -80,6 +80,9 @@ public static class IniParser
 	public static string timer;
 	public static string removeTimer;
 
+	public static string userCommand;
+	public static string addCompletedTimer;
+
 	public static string exit;
 
 	public static void ReadConfig()
@@ -290,6 +293,14 @@ public static class IniParser
 						break;
 					case "removeTimer":
 						removeTimer = parts[1];
+						break;
+
+					case "userCommand":
+						userCommand = parts[1];
+						break;
+
+					case "addCompletedTimer":
+						addCompletedTimer = parts[1];
 						break;
 
 					case "exit":

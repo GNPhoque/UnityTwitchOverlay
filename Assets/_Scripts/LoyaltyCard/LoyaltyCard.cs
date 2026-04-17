@@ -203,7 +203,7 @@ public class LoyaltyCard : MonoBehaviour
 			{
 				currentUser.completedCards++;
 				currentUser.currentCardStamps = 0;
-				WebSocketInteractions.instance.AddDailyCardCompleted(currentUser.username);
+				WebSocketInteractions.instance.AddCompletedTimer(currentUser.username);
 			}
 			Database.instance.UpdateUser(currentUser, queuedUser.cardType);
 		}

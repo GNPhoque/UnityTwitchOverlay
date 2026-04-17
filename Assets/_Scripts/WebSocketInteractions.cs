@@ -34,6 +34,8 @@ public class WebSocketInteractions : MonoBehaviour
 	[SerializeField]
 	private Transform canvas;
 	[SerializeField]
+	private TextMeshProUGUI streamEndTimer;
+	[SerializeField]
 	private CanvasScaler canvasScaler;
 	[SerializeField]
 	private Image splatterPrefab;
@@ -159,6 +161,14 @@ public class WebSocketInteractions : MonoBehaviour
 		StartCoroutine(GifPlayer.SetGifFromUrlCoroutine(lurkGifPath, (textures) => lurkGif = textures));
 
 		happyHourCoroutine = StartCoroutine(StartHappyHourRandom());
+
+		CreditsData data = JsonConvert.DeserializeObject<CreditsData>(File.ReadAllText(IniParser.creditsFile)) ?? new CreditsData();
+		int totalSubs = 0;
+		foreach (var sub in data.subs)
+		{
+			totalSubs += sub.Months == 0 ? 1 : sub.Months;
+		}
+		UpdateStreamEndTimer(totalSubs);
 	}
 
 	private void Update()
@@ -881,6 +891,13 @@ public class WebSocketInteractions : MonoBehaviour
 		CreditsData data = JsonConvert.DeserializeObject<CreditsData>(File.ReadAllText(IniParser.creditsFile)) ?? new CreditsData();
 		data.subs.Add(new SubData { User = user, Tier = tier });
 
+		int totalSubs = 0;
+		foreach (var sub in data.subs)
+		{
+			totalSubs += sub.Months == 0 ? 1 : sub.Months;
+		}
+		UpdateStreamEndTimer(totalSubs);
+
 		string json = JsonConvert.SerializeObject(data);
 		File.WriteAllText(IniParser.creditsFile, json);
 		UpdateCredits();
@@ -1535,5 +1552,15 @@ public class WebSocketInteractions : MonoBehaviour
 			steamAchievement.anchoredPosition -= Vector2.up * steamAchievementMoveSpeed * Time.deltaTime;
 			yield return null;
 		}
+	}
+
+	private void UpdateStreamEndTimer(int totalSubs)
+	{
+		int hour = 21;
+		string minutes = "00";
+		minutes = totalSubs % 2 == 0 ? "00" : "30";
+		hour += totalSubs / 2;
+
+		streamEndTimer.text = $"Fin du live : {hour}:{minutes}";
 	}
 }

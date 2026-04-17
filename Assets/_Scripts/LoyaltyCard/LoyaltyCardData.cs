@@ -31,7 +31,7 @@ public class LoyaltyCardUser
 
 	public override string ToString()
 	{
-		return $"username : {username}, avatarUrl : {avatarUrl}, totalStamps : {totalStamps}, currentCardStamps : {currentCardStamps}, completedCards : {completedCards} , stamps : {string.Join(", ", from t in stamps select $"{t.x}, {t.y}, {t.rotation}")}";
+		return $"username : {username}, avatarUrl : {avatarUrl ?? ""}, totalStamps : {totalStamps}, currentCardStamps : {currentCardStamps}, completedCards : {completedCards} , stamps : {string.Join(", ", from t in stamps select $"{t.x}, {t.y}, {t.rotation}")}";
 	}
 }
 

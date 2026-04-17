@@ -1,14 +1,11 @@
-using Firebase;
 using Firebase.Extensions;
 using Firebase.Firestore;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.UI;
 
 public class Database : MonoBehaviour
 {
@@ -174,7 +171,7 @@ public class Database : MonoBehaviour
 		{
 			if (x.IsCompletedSuccessfully)
 			{
-				url = x.Result.GetValue<string>("avatarUrl");
+				x.Result.TryGetValue<string>("avatarUrl", out url);
 			}
 		});
 

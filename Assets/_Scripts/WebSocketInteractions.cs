@@ -178,6 +178,13 @@ public class WebSocketInteractions : MonoBehaviour
 		{
 			totalSubs += sub.Months == 0 ? 1 : sub.Months;
 		}
+
+		foreach (var item in data.subgifts)
+		{
+			totalSubs += item.Value;
+		}
+
+
 		UpdateStreamEndTimer(totalSubs);
 	}
 
@@ -910,6 +917,13 @@ public class WebSocketInteractions : MonoBehaviour
 		{
 			totalSubs += sub.Months == 0 ? 1 : sub.Months;
 		}
+
+		foreach (var item in data.subgifts)
+		{
+			totalSubs += item.Value;
+		}
+
+
 		UpdateStreamEndTimer(totalSubs);
 
 		string json = JsonConvert.SerializeObject(data);
@@ -933,6 +947,22 @@ public class WebSocketInteractions : MonoBehaviour
 		{
 			data.subgifts.Add(user, count);
 		}
+
+
+
+		int totalSubs = 0;
+		foreach (var sub in data.subs)
+		{
+			totalSubs += sub.Months == 0 ? 1 : sub.Months;
+		}
+
+		foreach (var item in data.subgifts)
+		{
+			totalSubs += item.Value;
+		}
+
+
+		UpdateStreamEndTimer(totalSubs);
 
 		string json = JsonConvert.SerializeObject(data);
 		File.WriteAllText(IniParser.creditsFile, json);
